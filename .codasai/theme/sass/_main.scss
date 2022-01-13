@@ -1,0 +1,67 @@
+main {
+    display: flex;
+    height: calc(100vh - var(--header-height));
+
+    .page {
+        width: 37%;
+        max-width: 90ch;
+        flex-shrink: 0;
+    }
+
+    .file-viewer {
+        min-width: 0;
+        width: auto;
+        flex-grow: 1;
+    }
+
+    .explorer {
+        min-width: 220px;
+        width: 18%;
+        flex-shrink: 0;
+    }
+
+    & > * {
+        overflow: auto;
+    }
+
+    & > * + * {
+        border-left: solid 2px RGB(var(--primary-color));
+    }
+}
+
+@media screen and (max-width: $explorer-hide-bp) {
+    main {
+        .page {
+            width: 43%;
+        }
+
+        .explorer {
+            display: none;
+        }
+    }
+}
+
+@media screen and (max-width: $two-columns-bp) {
+    main {
+        flex-direction: column;
+
+        .page {
+            width: 100%;
+            height: 50%;
+        }
+
+        .file-viewer {
+            width: 100%;
+            height: 50%;
+        }
+
+        & > * + * {
+            border-left: none;
+            border-top: solid 2px RGB(var(--primary-color));
+        }
+    }
+}
+
+@import "page";
+@import "file-viewer";
+@import "explorer";

@@ -1,0 +1,36 @@
+<header>
+    <div class="offscreen-buttons">
+        {% with id="index", icon="list", class="primary" %}
+        {% include "offscreen/button.html" %}
+        {% endwith %}
+        {% with id="explorer", icon="account_tree", class="primary" %}
+        {% include "offscreen/button.html" %}
+        {% endwith %}
+    </div>
+
+    <div class="title">
+        <span>{{page.title}}
+    </div>
+
+    <div class="pagination-buttons button-group">
+        {% if page.previous_page_code %}
+        <a class="button primary" href="{{ guide.base_url | url_join(page.previous_page_code) }}">
+            <span class="material-icons-round md-18" aria-label="Previous page">arrow_back_ios</span>
+        </a>
+        {% else %}
+        <button class="button primary disabled">
+            <span class="material-icons-round md-18" aria-label="Previous page">arrow_back_ios</span>
+        </button>
+        {% endif %}
+
+        {% if page.next_page_code %}
+        <a class="button primary" href="{{ guide.base_url | url_join(page.next_page_code) }}">
+            <span class="material-icons-round md-18" aria-label="Next page">arrow_forward_ios</span>
+        </a>
+        {% else %}
+        <button class="button primary disabled">
+            <span class="material-icons-round md-18" aria-label="Next page">arrow_forward_ios</span>
+        </button>
+        {% endif %}
+    </div>
+</header>

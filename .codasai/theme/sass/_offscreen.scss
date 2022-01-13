@@ -1,0 +1,39 @@
+.offscreen {
+    display: none;
+    height: 100vh;
+    width: 100%;
+    max-width: 260px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: RGB(var(--offscreen-bg));
+    z-index: 100000;
+    overflow: auto;
+
+    &.open {
+        display: initial;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5em;
+        padding: 20px;
+    }
+}
+
+#dimmer {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 99999;
+    background-color: RGB(var(--offscreen-dimmer-bg), 0.6);
+
+    &.open {
+        display: block;
+    }
+}
+

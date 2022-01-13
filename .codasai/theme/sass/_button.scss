@@ -1,0 +1,55 @@
+.material-icons-round.md-18 { font-size: 18px; }
+.material-icons-round.md-24 { font-size: 24px; }
+.material-icons-round.md-36 { font-size: 36px; }
+.material-icons-round.md-48 { font-size: 48px; }
+.material-icons-round.md-i { font-size: inherit; }
+
+.button.md-18 .material-icons-round { font-size: 18px; }
+.button.md-24 .material-icons-round { font-size: 24px; }
+.button.md-36 .material-icons-round { font-size: 36px; }
+.button.md-48 .material-icons-round { font-size: 48px; }
+.button.md-i .material-icons-round { font-size: inherit; }
+
+.button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    border-radius: var(--button-border-radius);
+    padding: 2px 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button.primary {
+    background-color: RGB(var(--button-primary-bg));
+    color: RGB(var(--button-primary-fg));
+    transition: all 0.08s ease-in;
+
+    &.disabled {
+        cursor: not-allowed;
+        background-color: RGB(var(--button-primary-disabled-bg));
+    }
+
+    &:not(.disabled):hover {
+        background-color: RGB(var(--button-primary-bg-hover));
+    }
+}
+
+.button-group {
+    display: inline-flex;
+
+    & > .button {
+        border-radius: 0;
+    }
+
+    & > .button:first-child {
+        border-top-left-radius: var(--button-border-radius);
+        border-bottom-left-radius: var(--button-border-radius);
+    }
+
+    & > .button:last-child {
+        border-top-right-radius: var(--button-border-radius);
+        border-bottom-right-radius: var(--button-border-radius);
+    }
+}
