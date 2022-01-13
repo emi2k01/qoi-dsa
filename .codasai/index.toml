@@ -1,3 +1,7 @@
 [[entries]]
 name = 'Introduction'
 code = 'introduction'
+
+[[entries]]
+name = 'The header'
+code = 'the-header'
