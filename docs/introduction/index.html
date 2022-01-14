@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Introduction</title>
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;style&#x2f;style.css' media="all">
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;syntax&#x2f;inspired-github.css' media="screen and (prefers-color-scheme: light)">
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;syntax&#x2f;ayu-dark.css' media="screen and (prefers-color-scheme: dark)">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=6.0, minimum-scale=1.0">
+</head>
+<body data-workspace-url='&#x2f;qoi-dsa&#x2f;introduction&#x2f;workspace'>
+    <header>
+    <div class="offscreen-buttons">
+        
+        <button class="button primary" data-offscreen-id="offscreen-index">
+    <span class="material-icons-round">list</span>
+    
+</button>
+        
+        
+        <button class="button primary" data-offscreen-id="offscreen-explorer">
+    <span class="material-icons-round">account_tree</span>
+    
+</button>
+        
+    </div>
+
+    <div class="title">
+        <span>Introduction
+    </div>
+
+    <div class="pagination-buttons button-group">
+        
+        <button class="button primary disabled">
+            <span class="material-icons-round md-18" aria-label="Previous page">arrow_back_ios</span>
+        </button>
+        
+
+        
+        <a class="button primary" href="&#x2f;qoi-dsa&#x2f;the-header">
+            <span class="material-icons-round md-18" aria-label="Next page">arrow_forward_ios</span>
+        </a>
+        
+    </div>
+</header>
+    <main>
+    <div class="page">
+    <h1>Introduction</h1>
+<p>The QOI (Quite Ok Image) format is an image format developed not long ago. This
+guide will implement a simple decoder for education purposes.</p>
+<p>The other purpose of this guide is to try <code>codasai</code> in the real world. Dogfooding.</p>
+<h2>Creating the project</h2>
+<pre><code>$ cargo new qoi --lib
+</code></pre>
+<p>This creates a Cargo project named “qoi” in a directory with the same name.</p>
+<p>Enter the directory and your directory structure should like the one in <strong>Explorer</strong>.</p>
+<h2>Next</h2>
+<p>Click <strong><code>&gt;</code></strong> at the top-right corner to go to the next chapter.</p>
+
+</div>
+    <div id="file-viewer" class="file-viewer">
+    <div class="file-name-tab">
+        <span class="file-name">
+            Use the
+            <span class="material-icons-round md-i">account_tree</span>
+            <strong>
+                Explorer
+            </strong>
+            to open a file
+        </span>
+    </div>
+    <div class="numbered-file-contents">
+        <div class="line-numbers">
+            <a href="#">1</a>
+        </div>
+        <div class="file-contents">
+            <pre><code class="original"></code><code class="copy"></code></pre>
+        </div>
+    </div>
+</div>
+    <div class="explorer">
+    <h2>Explorer</h2>
+    <ul class="explorer-entries">
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>src</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;lib.rs"' data-path="src&#x2f;lib.rs" data-name="lib.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>lib.rs</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+
+
+<li>
+    <a href='#csai:open_file file="Cargo.toml"' data-path="Cargo.toml" data-name="Cargo.toml">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.toml</span>
+        </span>
+    </a>
+</li>
+
+</ul>
+</div>
+</main>
+    <div id="offscreen-explorer" class="offscreen">
+    <div class="header">
+        <h2>Explorer</h2>
+        
+        <button class="button primary md-18" data-offscreen-id="offscreen-explorer">
+    <span class="material-icons-round">close</span>
+    
+</button>
+        
+    </div>
+    <div class="content">
+        
+<ul class="explorer-entries">
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>src</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;lib.rs"' data-path="src&#x2f;lib.rs" data-name="lib.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>lib.rs</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+
+
+<li>
+    <a href='#csai:open_file file="Cargo.toml"' data-path="Cargo.toml" data-name="Cargo.toml">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.toml</span>
+        </span>
+    </a>
+</li>
+
+</ul>
+
+    </div>
+</div>
+    <div id="offscreen-index" class="offscreen">
+    <div class="header">
+        <h2>Index</h2>
+        
+        <button class="button primary md-18" data-offscreen-id="offscreen-index">
+    <span class="material-icons-round">close</span>
+    
+</button>
+        
+    </div>
+    <div class="content">
+        
+<ul class="index-entries">
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;introduction">
+            Introduction
+        </a>
+    </li>
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;the-header">
+            The header
+        </a>
+    </li>
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;the-chunks">
+            The chunks
+        </a>
+    </li>
+    
+</ul>
+
+    </div>
+</div>
+    <div id="dimmer"></div>
+
+    <script type="module" src='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;main.js'></script>
+</body>
+</html>

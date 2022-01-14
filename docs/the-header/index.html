@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The header</title>
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;style&#x2f;style.css' media="all">
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;syntax&#x2f;inspired-github.css' media="screen and (prefers-color-scheme: light)">
+    <link rel="stylesheet" href='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;syntax&#x2f;ayu-dark.css' media="screen and (prefers-color-scheme: dark)">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=6.0, minimum-scale=1.0">
+</head>
+<body data-workspace-url='&#x2f;qoi-dsa&#x2f;the-header&#x2f;workspace'>
+    <header>
+    <div class="offscreen-buttons">
+        
+        <button class="button primary" data-offscreen-id="offscreen-index">
+    <span class="material-icons-round">list</span>
+    
+</button>
+        
+        
+        <button class="button primary" data-offscreen-id="offscreen-explorer">
+    <span class="material-icons-round">account_tree</span>
+    
+</button>
+        
+    </div>
+
+    <div class="title">
+        <span>The header
+    </div>
+
+    <div class="pagination-buttons button-group">
+        
+        <a class="button primary" href="&#x2f;qoi-dsa&#x2f;introduction">
+            <span class="material-icons-round md-18" aria-label="Previous page">arrow_back_ios</span>
+        </a>
+        
+
+        
+        <a class="button primary" href="&#x2f;qoi-dsa&#x2f;the-chunks">
+            <span class="material-icons-round md-18" aria-label="Next page">arrow_forward_ios</span>
+        </a>
+        
+    </div>
+</header>
+    <main>
+    <div class="page">
+    <h1>The header</h1>
+<p>Before we start parsing, we need to know the format of what we’ll decode. For
+that, we’ll follow <a href="https://qoiformat.org/qoi-specification.pdf" rel="noopener noreferrer">QOI’s specification</a>.</p>
+<p>The spec. says:</p>
+<blockquote>
+<p>A QOI file consists of a 14-byte header, followed by any number of
+data “chunks” and an 8-byte end marker.</p>
+</blockquote>
+<p>And the header format is described as:</p>
+<pre><code>qoi_header {
+    char     magic[4];   // magic bytes "qoif"
+    uint32_t width;      // image width in pixels (BE)
+    uint32_t height;     // image height in pixels (BE)
+    uint8_t  channels;   // 3 = RGB, 4 = RGBA
+    uint8_t  colorspace; // 0 = sRGB with linear alpha
+                         // 1 = all channels linear
+}
+</code></pre>
+<p>Notice that, in the comments for the <code>width</code> and <code>height</code> fields, it says <code>(BE)</code>. That means that
+the endianness of those fields is big-endian.</p>
+<h2>Representing the header</h2>
+<p>We represent the header with <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20struct%20Header%22%20to=%22%5E%5C%7D%22" rel="noopener noreferrer"><code>struct Header</code></a>. The structure
+uses the equivalent data types to those in the C structure shown by the spec.</p>
+<p>We store the <code>magic</code> bytes in <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20const%20MAGIC%22%20to=%22%5C%5D;%22" rel="noopener noreferrer"><code>const MAGIC</code></a> because there’s no need to
+store it in every header. We use an array of <code>u8</code> because a C <code>char</code> is not a
+Rust <code>char</code>, it is a Rust <code>u8</code>; a byte.</p>
+<h2>Decoding the header</h2>
+<p>We write the function <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7Dpub%20fn%20decode%5C(%22%20to=%22%5C%7B%22" rel="noopener noreferrer"><code>Header::decode</code></a>. This will be the
+constructor for <code>Header</code>. In case of error, it returns a
+<a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20enum%20DecodeHeaderError%22%20to=%22%5E%7D%22" rel="noopener noreferrer"><code>struct DecodeHeaderError</code></a>.</p>
+<p>Then we start decoding the fields:</p>
+<ul>
+<li>
+<p><strong><a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B8%7Dif%20input.*MAGIC%22%20to=%22%5E%5Cs%7B8%7D%5C%7D%22" rel="noopener noreferrer">Magic</a></strong>: We compare the first 4 bytes against our <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20const%20MAGIC%22%20to=%22%5C%5D;%22" rel="noopener noreferrer"><code>const MAGIC</code></a>
+constant.</p>
+<p>If the first 4 bytes don’t match our magic constant, we return
+<a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7DMagic%22%20to=%22,%22" rel="noopener noreferrer"><code>DecodeHeaderError::Magic</code></a> containing the 4 bytes.</p>
+</li>
+<li>
+<p><strong><a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B8%7Dlet%20width%22%20to=%22;%22" rel="noopener noreferrer">Width</a></strong>: We take bytes with indices 4..=7 to create a <code>[u8; 4]</code>. </p>
+<p>We use <code>u32::from_be_bytes</code> because, remember: the <code>width</code> and <code>height</code>
+fields in the header are in big-endian order.</p>
+</li>
+<li>
+<p><strong><a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B8%7Dlet%20height%22%20to=%22;%22" rel="noopener noreferrer">Height</a></strong>: For the height we do the same as the width but we
+skip the first first 8 bytes instead.</p>
+</li>
+<li>
+<p><strong><a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B8%7Dlet%20channels.*;%22%20to=%22%5Cs%7B8%7D%7D;%22" rel="noopener noreferrer">Channels</a></strong>: The <code>channels</code> field is a single byte at the
+13th position so we just index it directly. We match its value and return a
+variant of <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20enum%20Channels%22%20to=%22%5E%7D%22" rel="noopener noreferrer"><code>enum Channels</code></a> depending on the value.</p>
+<p>If the value is invalid, we return <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7DChannels%22%20to=%22,%22" rel="noopener noreferrer"><code>DecodeHeaderError::Channels</code></a>
+containing the value we got.</p>
+</li>
+<li>
+<p><strong><a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B8%7Dlet%20colorspace.*;%22%20to=%22%5Cs%7B8%7D%7D;%22" rel="noopener noreferrer">Colorspace</a></strong>: We get the byte at the 14th position and
+match the value against 0 or 1 to choose the <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5Epub%20enum%20Colorspace%22%20to=%22%5E%7D%22" rel="noopener noreferrer"><code>enum Colorspace</code></a> variant.</p>
+<p>If the value is invalid, we return <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7DColorspace%22%20to=%22,%22" rel="noopener noreferrer"><code>DecodeHeaderError::Colorspace</code></a>
+containing the value we got.</p>
+</li>
+</ul>
+<h2>Testing</h2>
+<p>For testing we use the images provided by <a href="https://qoiformat.org/" rel="noopener noreferrer">qoiformat.org</a>. These
+are the images stored in the <code>assets/</code> directory.</p>
+<p>We write a <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7Dmacro_rules!%20decode_header%22%20to=%22%5E%5Cs%7B4%7D%7D%22" rel="noopener noreferrer"><code>macro decode_header</code></a> to help us read the images from the
+filesystem and pass the first 14 bytes to <a href="#csai:highlight%20file=%22src/header.rs%22%20from=%22%5E%5Cs%7B4%7Dpub%20fn%20decode%5C(%22%20to=%22%5C%7B%22" rel="noopener noreferrer"><code>Header::decode</code></a>.</p>
+<p>All tests have the same structure:</p>
+<ul>
+<li>Decode header from image.</li>
+<li>Create expected result.</li>
+<li>Assert the decoded header matches the expected result.</li>
+</ul>
+<p>We run the tests:</p>
+<pre><code>$ cargo test
+    Finished test [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests (target/debug/deps/qoi-21872ddd3645acaa)
+
+running 3 tests
+test header::tests::test_header_decode_testcard ... ok
+test header::tests::test_header_decode_testcard_rgba ... ok
+test header::tests::test_header_decode_dice ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+</code></pre>
+
+</div>
+    <div id="file-viewer" class="file-viewer">
+    <div class="file-name-tab">
+        <span class="file-name">
+            Use the
+            <span class="material-icons-round md-i">account_tree</span>
+            <strong>
+                Explorer
+            </strong>
+            to open a file
+        </span>
+    </div>
+    <div class="numbered-file-contents">
+        <div class="line-numbers">
+            <a href="#">1</a>
+        </div>
+        <div class="file-contents">
+            <pre><code class="original"></code><code class="copy"></code></pre>
+        </div>
+    </div>
+</div>
+    <div class="explorer">
+    <h2>Explorer</h2>
+    <ul class="explorer-entries">
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>assets</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;dice.png"' data-path="assets&#x2f;dice.png" data-name="dice.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>dice.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;dice.qoi"' data-path="assets&#x2f;dice.qoi" data-name="dice.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>dice.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim10.png"' data-path="assets&#x2f;kodim10.png" data-name="kodim10.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim10.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim10.qoi"' data-path="assets&#x2f;kodim10.qoi" data-name="kodim10.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim10.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim23.png"' data-path="assets&#x2f;kodim23.png" data-name="kodim23.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim23.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim23.qoi"' data-path="assets&#x2f;kodim23.qoi" data-name="kodim23.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim23.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;qoi_logo.png"' data-path="assets&#x2f;qoi_logo.png" data-name="qoi_logo.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>qoi_logo.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;qoi_logo.qoi"' data-path="assets&#x2f;qoi_logo.qoi" data-name="qoi_logo.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>qoi_logo.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard.png"' data-path="assets&#x2f;testcard.png" data-name="testcard.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard.qoi"' data-path="assets&#x2f;testcard.qoi" data-name="testcard.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard_rgba.png"' data-path="assets&#x2f;testcard_rgba.png" data-name="testcard_rgba.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard_rgba.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard_rgba.qoi"' data-path="assets&#x2f;testcard_rgba.qoi" data-name="testcard_rgba.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard_rgba.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;wikipedia_008.png"' data-path="assets&#x2f;wikipedia_008.png" data-name="wikipedia_008.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>wikipedia_008.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;wikipedia_008.qoi"' data-path="assets&#x2f;wikipedia_008.qoi" data-name="wikipedia_008.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>wikipedia_008.qoi</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>src</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;header.rs"' data-path="src&#x2f;header.rs" data-name="header.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>header.rs</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;lib.rs"' data-path="src&#x2f;lib.rs" data-name="lib.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>lib.rs</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+
+
+<li>
+    <a href='#csai:open_file file="Cargo.lock"' data-path="Cargo.lock" data-name="Cargo.lock">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.lock</span>
+        </span>
+    </a>
+</li>
+
+<li>
+    <a href='#csai:open_file file="Cargo.toml"' data-path="Cargo.toml" data-name="Cargo.toml">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.toml</span>
+        </span>
+    </a>
+</li>
+
+</ul>
+</div>
+</main>
+    <div id="offscreen-explorer" class="offscreen">
+    <div class="header">
+        <h2>Explorer</h2>
+        
+        <button class="button primary md-18" data-offscreen-id="offscreen-explorer">
+    <span class="material-icons-round">close</span>
+    
+</button>
+        
+    </div>
+    <div class="content">
+        
+<ul class="explorer-entries">
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>assets</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;dice.png"' data-path="assets&#x2f;dice.png" data-name="dice.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>dice.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;dice.qoi"' data-path="assets&#x2f;dice.qoi" data-name="dice.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>dice.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim10.png"' data-path="assets&#x2f;kodim10.png" data-name="kodim10.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim10.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim10.qoi"' data-path="assets&#x2f;kodim10.qoi" data-name="kodim10.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim10.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim23.png"' data-path="assets&#x2f;kodim23.png" data-name="kodim23.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim23.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;kodim23.qoi"' data-path="assets&#x2f;kodim23.qoi" data-name="kodim23.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>kodim23.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;qoi_logo.png"' data-path="assets&#x2f;qoi_logo.png" data-name="qoi_logo.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>qoi_logo.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;qoi_logo.qoi"' data-path="assets&#x2f;qoi_logo.qoi" data-name="qoi_logo.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>qoi_logo.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard.png"' data-path="assets&#x2f;testcard.png" data-name="testcard.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard.qoi"' data-path="assets&#x2f;testcard.qoi" data-name="testcard.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard_rgba.png"' data-path="assets&#x2f;testcard_rgba.png" data-name="testcard_rgba.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard_rgba.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;testcard_rgba.qoi"' data-path="assets&#x2f;testcard_rgba.qoi" data-name="testcard_rgba.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>testcard_rgba.qoi</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;wikipedia_008.png"' data-path="assets&#x2f;wikipedia_008.png" data-name="wikipedia_008.png">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>wikipedia_008.png</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="assets&#x2f;wikipedia_008.qoi"' data-path="assets&#x2f;wikipedia_008.qoi" data-name="wikipedia_008.qoi">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>wikipedia_008.qoi</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+<li>
+    <button>
+        <span  style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round icon-closed">folder</span>
+            <span class="material-icons-round icon-open">folder_open</span>
+            <span>src</span>
+        </span>
+    </button>
+    <ul>
+        
+
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;header.rs"' data-path="src&#x2f;header.rs" data-name="header.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>header.rs</span>
+        </span>
+    </a>
+</li>
+        
+        <li>
+    <a href='#csai:open_file file="src&#x2f;lib.rs"' data-path="src&#x2f;lib.rs" data-name="lib.rs">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (2 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>lib.rs</span>
+        </span>
+    </a>
+</li>
+        
+    </ul>
+</li>
+
+
+
+<li>
+    <a href='#csai:open_file file="Cargo.lock"' data-path="Cargo.lock" data-name="Cargo.lock">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.lock</span>
+        </span>
+    </a>
+</li>
+
+<li>
+    <a href='#csai:open_file file="Cargo.toml"' data-path="Cargo.toml" data-name="Cargo.toml">
+        <span style="padding-left: calc(var(--explorer-entry-initial-margin) + var(--explorer-entry-margin-per-depth) * (1 - 1))">
+            <span class="material-icons-round">description</span>
+            <span>Cargo.toml</span>
+        </span>
+    </a>
+</li>
+
+</ul>
+
+    </div>
+</div>
+    <div id="offscreen-index" class="offscreen">
+    <div class="header">
+        <h2>Index</h2>
+        
+        <button class="button primary md-18" data-offscreen-id="offscreen-index">
+    <span class="material-icons-round">close</span>
+    
+</button>
+        
+    </div>
+    <div class="content">
+        
+<ul class="index-entries">
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;introduction">
+            Introduction
+        </a>
+    </li>
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;the-header">
+            The header
+        </a>
+    </li>
+    
+    <li>
+        <a href="&#x2f;qoi-dsa&#x2f;the-chunks">
+            The chunks
+        </a>
+    </li>
+    
+</ul>
+
+    </div>
+</div>
+    <div id="dimmer"></div>
+
+    <script type="module" src='&#x2f;qoi-dsa&#x2f;public&#x2f;theme&#x2f;main.js'></script>
+</body>
+</html>
