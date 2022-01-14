@@ -1,3 +1,5 @@
+use crate::error::DecodeHeaderError;
+
 pub const MAGIC: [u8; 4] = [b'q', b'o', b'i', b'f'];
 
 #[derive(Debug, PartialEq, Eq)]
@@ -53,31 +55,6 @@ pub enum Colorspace {
     Srgb,
     Linear,
 }
-
-#[derive(Debug)]
-pub enum DecodeHeaderError {
-    Magic([u8; 4]),
-    Channels(u8),
-    Colorspace(u8),
-}
-
-impl std::fmt::Display for DecodeHeaderError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Magic(magic) => write!(
-                f,
-                "invalid magic: `[{:x}, {:x}, {:x}, {:x}]`",
-                magic[0], magic[1], magic[2], magic[3]
-            ),
-            Self::Channels(channels) => write!(f, "invalid channels value: `{}`", channels),
-            Self::Colorspace(colorspace) => {
-                write!(f, "invalid color space: `{}`", colorspace)
-            }
-        }
-    }
-}
-
-impl std::error::Error for DecodeHeaderError {}
 
 #[cfg(test)]
 mod tests {

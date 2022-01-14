@@ -30,17 +30,8 @@
     }
 
     a[href^="#csai"] {
-        padding: 0.08em 0.15em;
         text-decoration: underline dotted;
-        background-color: RGB(var(--action-bg));
-        border-radius: 5px;
         color: RGBA(var(--action-fg));
-
-        code {
-            background-color: transparent;
-            border-radius: 0;
-            padding: 0;
-        }
     }
 
     code {
